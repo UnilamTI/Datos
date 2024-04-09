@@ -1,0 +1,91 @@
+Sub consolida()
+
+Dim FileToOpen As Variant
+Dim wb As Workbook
+Dim ws  As Worksheet
+Dim i As Long ' filas de cada hoja Sep
+Dim j As Long ' filas de la hoja Todos
+Dim c As Long ' cantidad columnas de cada hoja Sep
+Dim filas As Long ' ultima fila de la hoja Sep
+Dim celda As Range ' para buscar la columna
+j = 2
+
+
+Call TurnOffFunctionality
+
+
+FileToOpen = Application.GetOpenFilename(Title:="Seleccione Excel a consolidar", FileFilter:="Excel Files (*.xls*),*xls*")
+    If FileToOpen <> False Then
+       Set wb = Application.Workbooks.Open(FileToOpen)
+       wb.Sheets("Todos").Range("A2:BK10000").ClearContents
+
+
+        For Each ws In ActiveWorkbook.Worksheets
+                    If Left(ws.Name, 3) = "SEP" Then
+                        ws.Activate
+                        i = 2
+                        
+                        Application.Goto Reference:="R1C100"
+                        Selection.End(xlToLeft).Offset(1, 0).Select
+                        c = ActiveCell.Column - 1 ' almacena la ultima columna con datos sin tener en cuenta la que es LIBC
+                        
+                        
+                        Application.Goto Reference:="R10000C1"
+                        Selection.End(xlUp).Offset(1, 0).Select
+                        filas = ActiveCell.Row - 1 ' almacena la ultima fila
+                        
+                        
+                        For fila = 2 To filas
+                        
+                                wb.Sheets("Todos").Cells(j, 1).Value = Cells(i, 1)
+                                
+                                    For q = 7 To c
+                                    
+                                        
+                                           If IsNumeric(Cells(i, q).Value) Then
+                                            Set celda = wb.Sheets("Todos").Range("B1:BK1").Find(What:=Cells(1, q).Value, _
+                                                             After:=Range("B1"), _
+                                                             LookAt:=xlWhole)
+                                                         
+                                            
+                                                If Not celda Is Nothing Then
+                                                    wb.Sheets("Todos").Cells(j, celda.Column).Value = Cells(i, q)
+                                                End If
+                                            End If
+                                        
+                                        
+                                    
+                                    Next q
+                                i = i + 1 ' siguiente fila de la hoja SEP
+                                j = j + 1 ' siguiente fila de la hoja Todos
+                        Next fila
+                        
+                     End If
+        Next ws
+       
+       Else
+        MsgBox "No se seleccionó ningún archivo"
+        Call TurnOnFunctionality
+      End
+    End If
+    
+    Call TurnOnFunctionality
+    MsgBox "Fin del proceso"
+End Sub
+
+
+
+
+Private Sub TurnOffFunctionality()
+    Application.Calculation = xlCalculationManual
+    Application.DisplayStatusBar = False
+    Application.EnableEvents = False
+    Application.ScreenUpdating = False
+End Sub
+
+Private Sub TurnOnFunctionality()
+    Application.Calculation = xlCalculationAutomatic
+    Application.DisplayStatusBar = True
+    Application.EnableEvents = True
+    Application.ScreenUpdating = True
+End Sub
