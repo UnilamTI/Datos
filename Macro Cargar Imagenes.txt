@@ -1,0 +1,84 @@
+Sub Macro()
+
+Application.ScreenUpdating = False
+
+N = Range("a1").End(xlDown).Row
+
+For i = 2 To N
+
+  ActiveSheet.Hyperlinks.Add _
+    Cells(i, "C"), Cells(i, "A"), TextToDisplay:=CStr(Cells(i, "B"))
+Next
+
+
+Application.ScreenUpdating = True
+
+End Sub
+
+'Sub hipervinculo() ' agrega hipervinculo en la columna N, tomando el hipervinculo de la columna A
+'
+'Application.ScreenUpdating = False
+'
+'N = Range("a1").End(xlDown).Row
+'
+'For i = 2 To N
+'
+'    Cells(i, "N").Value = Cells(i, "A").Hyperlinks(1).Address
+'    Cells(i, "N").Hyperlinks.Add Cells(i, "N"), Cells(i, "N")
+'
+'Next
+'
+'
+'Application.ScreenUpdating = True
+'
+'End Sub
+
+
+Sub InsertPic()
+Dim PicPath As String, Pic As Picture, ImageCell As Range
+Dim shp As Shape
+Set shpList = ActiveSheet.Shapes
+
+Application.ScreenUpdating = False
+
+
+N = Range("a1").End(xlDown).Row
+
+For i = 2 To N
+
+    
+  For Each shp In shpList
+     If Cells(i, "N").Address = shp.TopLeftCell.Address Then
+       hay = 1 ' hay foto
+       Exit For
+     Else
+       hay = 0
+     End If
+  Next
+    
+    If hay = 0 Then ' si no hay foto
+        PicPath = Cells(i, "A").Hyperlinks(1).Address
+        Set ImageCell = Cells(i, "N").MergeArea
+        
+    
+        If Dir(PicPath) <> "" Then
+            Set Pic = ActiveSheet.Pictures.Insert(PicPath)
+            With Pic
+                .ShapeRange.LockAspectRatio = msoFalse
+                .Left = ImageCell.Left
+                .Top = ImageCell.Top
+                .Width = ImageCell.Width
+                .Height = ImageCell.Height
+            End With
+        End If
+     End If
+Next
+    
+    Application.ScreenUpdating = True
+    
+End Sub
+
+Sub elimina()
+ActiveSheet.Pictures.Delete
+
+End Sub
